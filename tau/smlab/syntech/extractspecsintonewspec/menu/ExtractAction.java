@@ -10,12 +10,12 @@ import org.eclipse.swt.widgets.MenuItem;
 import tau.smlab.syntech.extractspecsintonewspec.action.ActionsID;
 import tau.smlab.syntech.extractspecsintonewspec.action.ExtractSpecsIntoNewSpecAction;
 
-public class SearchAction extends ContributionItem{
+public class ExtractAction extends ContributionItem{
 
-	public SearchAction(){
+	public ExtractAction(){
 	}
 	
-    public SearchAction(String id) {
+    public ExtractAction(String id) {
         super(id);
     }
 
@@ -29,6 +29,7 @@ public class SearchAction extends ContributionItem{
         menuItem.setText("Extract Subset of the Specification into a New Spec");
         menuItem.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
+              System.out.println("marked code " + e.text);
                 //what to do when menu is subsequently selected.
                 new ExtractSpecsIntoNewSpecAction().run(ActionsID.CREATE);             
             }

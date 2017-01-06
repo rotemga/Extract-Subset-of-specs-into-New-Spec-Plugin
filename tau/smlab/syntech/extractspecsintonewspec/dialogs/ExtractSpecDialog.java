@@ -6,13 +6,10 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -21,10 +18,10 @@ import org.eclipse.swt.widgets.Text;
 
 public class ExtractSpecDialog extends TitleAreaDialog {
 
-	private Combo ProjectNameCombo;
+	private Text textDirectoryName;
 	private Text textFileName;
 
-	private String projectNameString;
+	private String directoryNameString;
 	private String fileName;
 	private boolean isCancelPressed;
 	
@@ -36,7 +33,7 @@ public class ExtractSpecDialog extends TitleAreaDialog {
 	public void create() {
 		super.create();
 		setTitle("Extract Subset of the Specification into a New File");
-		setMessage("Please select a spectra file name and a project that the new file will be in", IMessageProvider.INFORMATION);
+		setMessage("Please select a spectra file name and a directory that the new file will be in", IMessageProvider.INFORMATION);
 		// initially disable OK button
 		getButton(IDialogConstants.OK_ID).setEnabled(false);
 		getButton(IDialogConstants.OK_ID).setText("Create");
@@ -58,31 +55,14 @@ public class ExtractSpecDialog extends TitleAreaDialog {
 
 	private void createProjectName(Composite container) {
 		Label lbtProjectName = new Label(container, SWT.NONE);
-		lbtProjectName.setText("Project Name:");
+		lbtProjectName.setText("Directory Name:");
 
 		GridData dataProjectName = new GridData();
 		dataProjectName.grabExcessHorizontalSpace = true;
 		dataProjectName.horizontalAlignment = GridData.FILL;
-
-		ProjectNameCombo = new Combo(container, SWT.BORDER);
-		IProject[] projectsList = getProjects();
-		for (IProject p : projectsList) {
-		  ProjectNameCombo.add(p.getName());
-		}
-
-		ProjectNameCombo.setLayoutData(dataProjectName);
-
-		// don't allow typing into the combo box
-		// Note: instead you can change the construction this way, but the combo
-		// will have a grey background
-		// Combo entityKind = new Combo(container, SWT.BORDER | SWT.READ_ONLY);
-		ProjectNameCombo.addKeyListener(new KeyAdapter() {
-			public void keyPressed(KeyEvent e) {
-				e.doit = false;
-			}
-		});
-
-		ProjectNameCombo.addModifyListener(new ModifyListener() {
+		textDirectoryName = new Text(container, SWT.BORDER);
+    textDirectoryName.setLayoutData(dataProjectName);
+		textDirectoryName.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
 				validate();
@@ -110,16 +90,19 @@ public class ExtractSpecDialog extends TitleAreaDialog {
 	
 
 
-	private void validate() {
-		if (isEmpty(textFileName.getText()) || isEmpty(ProjectNameCombo.getText())) {
-			getButton(IDialogConstants.OK_ID).setEnabled(false);
-		} else if (textFileName.getText().contains(" ")) {
-			getButton(IDialogConstants.OK_ID).setEnabled(false);
-			setErrorMessage("File name shouldn't contain spaces");
-		} else {
-			getButton(IDialogConstants.OK_ID).setEnabled(true);
-		}
-	}
+  private void validate() {
+    if (isEmpty(textFileName.getText()) || isEmpty(textDirectoryName.getText())) {
+      getButton(IDialogConstants.OK_ID).setEnabled(false);
+    } else if (textDirectoryName.getText().contains(" ")) {
+      getButton(IDialogConstants.OK_ID).setEnabled(false);
+      setErrorMessage("Directory name shouldn't contain spaces");
+    } else if (textFileName.getText().contains(" ")) {
+      getButton(IDialogConstants.OK_ID).setEnabled(false);
+      setErrorMessage("File name shouldn't contain spaces");
+    } else {
+      getButton(IDialogConstants.OK_ID).setEnabled(true);
+    }
+  }
 
 	private boolean isEmpty(String text) {
 		if (text == null) {
@@ -141,7 +124,7 @@ public class ExtractSpecDialog extends TitleAreaDialog {
 	// save content of the fields because they get disposed
 	// as soon as the Dialog closes
 	private void saveInput() {
-		projectNameString = ProjectNameCombo.getText();
+		directoryNameString = textDirectoryName.getText();
 		fileName = textFileName.getText();
 	}
 
@@ -157,8 +140,8 @@ public class ExtractSpecDialog extends TitleAreaDialog {
 		super.cancelPressed();
 	}
 	
-	public String getProjectName() {
-		return projectNameString;
+	public String getDirectoryName() {
+		return directoryNameString;
 	}
 
 	public String getFileName() {

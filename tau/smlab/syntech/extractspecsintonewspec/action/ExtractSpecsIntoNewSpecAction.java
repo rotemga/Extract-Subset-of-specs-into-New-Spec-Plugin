@@ -1,5 +1,4 @@
 package tau.smlab.syntech.extractspecsintonewspec.action;
-//import static tau.smlab.syntech.extractspecsintonewspec.Activator.PLUGIN_NAME;
 
 import static tau.smlab.syntech.extractspecsintonewspec.Activator.PLUGIN_NAME;
 
@@ -7,10 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
@@ -23,13 +18,9 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
-import org.eclipse.xtext.nodemodel.INode;
-import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 
-import tau.smlab.syntech.extractspecsintonewspec.Constants;
 import tau.smlab.syntech.extractspecsintonewspec.Searcher;
 import tau.smlab.syntech.extractspecsintonewspec.dialogs.ExtractSpecDialog;
-import tau.smlab.syntech.extractspecsintonewspec.dialogs.ExtractSpecResultDialog;
 
 
 
@@ -39,6 +30,7 @@ public class ExtractSpecsIntoNewSpecAction {
   private IWorkbenchWindow window;
   private IWorkbenchPage activePage;
   private Shell shell;
+  private String SelectedText;
   
   
   
@@ -64,47 +56,40 @@ public class ExtractSpecsIntoNewSpecAction {
         {
           break;
         }
-        ///////////////
-        String entityKindRepresentation = (searchDialog.getProjectName().equals("Assumption") ? Constants.ASSUMPTION : Constants.GUARANTEE);
         Searcher searcher = new Searcher();
-       // boolean isEntityFound = searcher.find(specFile, entityKindRepresentation, searchDialog.getFileName());
-        boolean isFileFound = searcher.find(searchDialog.getProjectName(), searchDialog.getFileName());
-
-        if (!isFileFound) {
-          String specFileName = specFile.getName();
-          int extensionInd = specFileName.indexOf(".");
-          ExtractSpecResultDialog searchResultDialog = new ExtractSpecResultDialog(shell, specFileName.substring(0, extensionInd), searchDialog.getProjectName(), searchDialog.getFileName(), searcher.getType(), searcher.getContent());
-          searchResultDialog.open();
+        
+        boolean isDirectoryExists = searcher.isDirectoryExists(searchDialog.getDirectoryName());
+        if (!isDirectoryExists) {
+          MessageDialog directoryIsNotExistDialog = new MessageDialog(shell, PLUGIN_NAME, null, 
+              "The Directory " + searchDialog.getDirectoryName() + " is not exists. Please try again.",
+              MessageDialog.INFORMATION, new String[] {"Try Again", "Close"}, 0);
           
-          if (searchResultDialog.isSearchAgainPressed())
-          {
+          int result = directoryIsNotExistDialog.open();
+          if (result == 0) {
             tryAgain = true;
-          }
-          else
-          {
+          } else if (result == 1) {
             tryAgain = false;
           }
+          continue;
+
+        }
+        boolean isFileExists = searcher.isFileExists(searchDialog.getFileName(), searchDialog.getDirectoryName());
+
+        if (!isFileExists) {
+          searcher.createSpectraFile(searchDialog.getFileName(), searchDialog.getDirectoryName(), SelectedText);
           
-          if (searchResultDialog.isMarkersButtonPressed())
-          {
-            EObject eobject = searcher.getEObject();
-            INode node = NodeModelUtils.getNode(eobject);
-            IMarker marker;
-            try {
-              marker = specFile.createMarker("tau.smlab.syntech.entitiesfinder.ui.marker");
-              marker.setAttribute(IMarker.MESSAGE, "Search result");
-              marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
-              marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO);
-              marker.setAttribute(IMarker.LOCATION, node.getStartLine());
-              marker.setAttribute(IMarker.CHAR_START, node.getOffset());
-              marker.setAttribute(IMarker.CHAR_END, node.getEndOffset());           
-            } catch (CoreException e) {
-            }
-          }
+          MessageDialog fileCreatedDialog = new MessageDialog(shell, PLUGIN_NAME, null, 
+              "The file " + searchDialog.getFileName() + " was created in the directory " + searchDialog.getDirectoryName(),
+              MessageDialog.INFORMATION, new String[] {"OK"}, 0);
           
-        } else { // isFileFound
+          fileCreatedDialog.open();
+          tryAgain = false;
+          break;
+ 
+          
+        } else { // isFileExists
           MessageDialog fileAlreadyExistDialog = new MessageDialog(shell, PLUGIN_NAME, null, 
-              "The file " + searchDialog.getFileName() + " is already exists in the project'" + searchDialog.getProjectName() + ". Please try again.",
+              "The file " + searchDialog.getFileName() + " is already exists in the directory " + searchDialog.getDirectoryName() + ". Please try again.",
               MessageDialog.INFORMATION, new String[] {"Try Again", "Close"}, 0);
           
           int result = fileAlreadyExistDialog.open();
@@ -149,6 +134,8 @@ public class ExtractSpecsIntoNewSpecAction {
 
     // selected on text view (the code window)
     if (selection instanceof TextSelection) {
+      TextSelection textSelection = (TextSelection) selection;
+      SelectedText = textSelection.getText();
       IEditorPart editor = activePage.getActiveEditor();
       IFile original = ((FileEditorInput) editor.getEditorInput()).getFile();
       specFile = original;
@@ -195,6 +182,8 @@ public class ExtractSpecsIntoNewSpecAction {
     }
     return true;
   }
+
+
   
   
 }
