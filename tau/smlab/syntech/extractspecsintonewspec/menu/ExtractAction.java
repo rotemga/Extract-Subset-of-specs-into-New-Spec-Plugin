@@ -29,7 +29,6 @@ public class ExtractAction extends ContributionItem{
         menuItem.setText("Extract Subset of the Specification into a New Spec");
         menuItem.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-              System.out.println("marked code " + e.text);
                 //what to do when menu is subsequently selected.
                 new ExtractSpecsIntoNewSpecAction().run(ActionsID.CREATE);             
             }

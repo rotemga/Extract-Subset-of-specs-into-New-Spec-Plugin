@@ -99,6 +99,9 @@ public class ExtractSpecDialog extends TitleAreaDialog {
     } else if (textFileName.getText().contains(" ")) {
       getButton(IDialogConstants.OK_ID).setEnabled(false);
       setErrorMessage("File name shouldn't contain spaces");
+    } else if (!isFileNameLegal(textFileName.getText())) {
+      getButton(IDialogConstants.OK_ID).setEnabled(false);
+      setErrorMessage("File name is not legal");
     } else {
       getButton(IDialogConstants.OK_ID).setEnabled(true);
     }
@@ -110,11 +113,14 @@ public class ExtractSpecDialog extends TitleAreaDialog {
 		}
 		return text.trim().isEmpty();
 	} 
-	
-  public IProject[] getProjects(){
-    IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-    return projects;
-    }
+	private boolean isFileNameLegal(String fileName) {
+	  for (int i=0; i<fileName.length(); i++) {
+	    if (!(Character.isLetter(fileName.charAt(i))) && !(Character.isDigit(fileName.charAt(i)))) {
+	      return false;
+	    }
+	  }
+	  return true;
+	}
   
 	@Override
 	protected boolean isResizable() {

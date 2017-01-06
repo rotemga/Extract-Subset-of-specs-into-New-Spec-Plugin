@@ -28,7 +28,7 @@ public class Searcher {
 
 
   public boolean isDirectoryExists(String directoryPath) {
-    //directoryPath = "C:\\Users\\User\\runtime-EclipseApplication\\CarSpec\\src";
+    
     String workspacePath = ResourcesPlugin.getWorkspace().getRoot().getLocation().toString();
     directoryPath = workspacePath + "/" + directoryPath;
     System.out.println(workspacePath + "  is the workspace path");
@@ -43,36 +43,35 @@ public class Searcher {
 
   }
 	
-	public boolean isFileExists (String filePath, String directoryName) {
-	  //filePath = "C:\\Users\\User\\workspace\\iSynthExamples\\basics\\Elevator.spectra";
+  public boolean isFileExists(String filePath, String directoryName) {
+    // "C:\\Users\\User\\workspace\\iSynthExamples\\basics\\Elevator.spectra";
     String workspacePath = ResourcesPlugin.getWorkspace().getRoot().getLocation().toString();
     filePath = workspacePath + "/" + directoryName + "/" + filePath + ".spectra";
-	   File f = new File(filePath);
-	    if (f.exists() && f.isFile()) {
-	      System.out.println(filePath + " file exists");
-	      return true;
-	    }
-	    System.out.println(filePath + " file does not exists");
-	    return false;
-	}
-	
-	public void createSpectraFile (String fileName, String directoryName, String selectedText) {
-	  
-	  String workspacePath = ResourcesPlugin.getWorkspace().getRoot().getLocation().toString();
+    File f = new File(filePath);
+    if (f.exists() && f.isFile()) {
+      System.out.println(filePath + " file exists");
+      return true;
+    }
+    System.out.println(filePath + " file does not exists");
+    return false;
+  }
+
+  public void createSpectraFile(String fileName, String directoryName, String selectedText) {
+
+    String workspacePath = ResourcesPlugin.getWorkspace().getRoot().getLocation().toString();
     String filePath = workspacePath + "/" + directoryName + "/" + fileName + ".spectra";
     File file = new File(filePath);
-    if(!file.exists()){
-         try {
-            file.createNewFile();
-            String data =Constants.MODULE + " " + fileName + "\n" + "\n";
-            data += selectedText;
-            Files.writeStringIntoFile(filePath, data);
+    if (!file.exists()) {
+      try {
+        file.createNewFile();
+        String data = Constants.MODULE + " " + fileName + "\n" + "\n";
+        data += selectedText;
+        Files.writeStringIntoFile(filePath, data);
 
-
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
     }
 	  
 	}
